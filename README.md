@@ -1,1 +1,3 @@
-# OS_TUT
+# OS
+
+Implementation of Scheduling and Page Replacement Algorithms
