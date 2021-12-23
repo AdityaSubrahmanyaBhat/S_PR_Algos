@@ -1,3 +1,3 @@
 # OS
 
-Implementation of Shortest-Response-Time-First (SRTF) Scheduling and Clock Page Replacement Algorithms
+Implementation of Shortest-Response-Time-First (SRTF) Process Scheduling and Clock Page Replacement Algorithms
