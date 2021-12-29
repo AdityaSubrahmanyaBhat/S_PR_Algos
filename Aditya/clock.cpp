@@ -10,29 +10,38 @@ public:
     int fault;
     int hit;
 
+    //initialise hit and fault count to zero
     Process(){
         fault=hit=0;
     }
 };
 
+
 Process CLOCK(Process proc,string ref, int len, int n)
 {
-    map<char, int> bits;
+    //to keep track of second chances
+    map<char, int> bits; 
+    //clock pointer
     int pointer = 0;
+    //vector to keep track of which processes are currently in the frames
     vector<char> frames;
     int i = -1;
     int char_count = 0;
+    //first character is put into the frame
     frames.push_back(ref[0]);
     while (++i < len)
     {
+        //if a hit occurs
         if (find(frames.begin(), frames.end(), ref[char_count]) != frames.end())
         {
             proc.hit++;
+            //if the rbit of the process is 0
             if (!bits[ref[char_count]])
             {
                 frames[pointer] = ref[char_count];
                 pointer = (pointer + 1) % n;
             }
+            //if the rbit of the process is 1
             else
             {
                 for (int i = 0; i < n; i++)
@@ -47,6 +56,7 @@ Process CLOCK(Process proc,string ref, int len, int n)
                 }
             }
         }
+        //if a page fault occurs
         else
         {
             proc.fault++;
