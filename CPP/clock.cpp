@@ -22,17 +22,15 @@ private:
 	int frames;
 	void initFrames();
 	void initFrameVector();
-	void initPageChance();
 
 public:
 	Process();
 	
-	int clock_hand = 0;
-	int ref_ptr = 0;
+	int clock_hand;
+	int ref_ptr;
 	
-	vector<string> frame_vector;
+	vector<tuple<string,int>> frame_vector;
 	vector<string> ref_vector;
-	map<string,int> pageChance;
 	
 	int getFaults();
 	int getHits();
@@ -42,12 +40,12 @@ public:
 	void incrementHits();
 
 	void initStuctures();
-	void getPages(string ref_str);
+	void getPages(string);
 	void CPR_Algo();
-	void caseFault();
-	void caseHit();
-	void toggleChance();
 	void moveClockHand();
+	void caseFault();
+	void toggleChance(int);
+	void printTable();
 };
 
 
@@ -55,6 +53,8 @@ Process::Process()
 {
 	faults=0;
 	hits=0;
+	clock_hand = 0;
+	ref_ptr = -1;
 }
 
 void Process::initFrames()
@@ -67,24 +67,15 @@ void Process::initFrameVector()
 {
 	for(int i=0;i<this->getFrames();i++)
 	{
-		this->frame_vector.push_back("");
+		this->frame_vector.emplace_back("_",0);
 	}
 }
 
-void Process::initPageChance()
-{
-	vector<string>::iterator it;
-	for(it=this->frame_vector.begin();it!=this->frame_vector.end();it++)
-	{
-		this->pageChance.insert(pair<string,int>(*it,0));
-	}
-}
 
 void Process::initStuctures()
 {
 	this->initFrames();
 	this->initFrameVector();
-	this->initPageChance();
 }
 
 int Process::getFaults()
@@ -117,80 +108,46 @@ void Process::moveClockHand()
 	this->clock_hand = (this->clock_hand+1) % this->frames;
 }
 
-void Process::toggleChance()
+void Process::toggleChance(int index = -1)
 {
-	this->pageChance.at(this->frame_vector[this->ref_ptr]) = 1 - this->pageChance.at(this->frame_vector[this->ref_ptr]);
+	if(index==-1) index = this->clock_hand;
+	get<1>(this->frame_vector[index]) = 1 - get<1>(this->frame_vector[index]);
 }
 
 void Process::caseFault()
 {
 	this->incrementFaults();
-	while(this->pageChance.at(this->frame_vector[this->clock_hand]))
+	while(get<1>(this->frame_vector[this->clock_hand]))
 	{
 		this->toggleChance();
 		this->moveClockHand();
 	}
-	this->frame_vector[this->clock_hand] = this->ref_vector[this->ref_ptr];
+	get<0>(this->frame_vector[this->clock_hand]) = this->ref_vector[this->ref_ptr];
 	this->moveClockHand();
-}
-
-void Process::caseHit()
-{
-	this->incrementHits();
-	if(!this->pageChance.at(this->frame_vector[this->ref_ptr]))
-	{
-		this->toggleChance();
-	}
 }
 
 void Process::CPR_Algo()
 {
-	while( (this->ref_ptr)++ < this->ref_vector.size() )
+	while( ++(this->ref_ptr) < this->ref_vector.size() )
 	{
-		if(find(this->frame_vector.begin(),this->frame_vector.end(),this->ref_vector[this->ref_ptr]) != this->frame_vector.end())
+		vector<tuple<string,int>>::iterator it = find(this->frame_vector.begin(),this->frame_vector.end(),make_tuple(this->ref_vector[this->ref_ptr],0));
+		if(it != this->frame_vector.end())
 		{
-			this->caseHit();
+			this->incrementHits();
+			this->toggleChance(distance(this->frame_vector.begin(),it));
+		}
+		else if(find(this->frame_vector.begin(),this->frame_vector.end(),make_tuple(this->ref_vector[this->ref_ptr],1)) != this->frame_vector.end())
+		{
+			this->incrementHits();
 		}
 		else
 		{
 			this->caseFault();
 		}
+
+		this->printTable();
 	}
 }
-
-// void Process::CLOCK(Process proc,string ref, int len, int n)
-// {
-// 	while (++i < len)
-// 	{
-// 		//if a hit occurs
-// 		if (find(frames.begin(), frames.end(), ref[i]) != frames.end())
-// 		{
-// 			proc.hit++;
-// 			//if the rbit of the process is 0
-// 			if (!bits[ref[i]])
-// 			{
-// 				frames[clock_hand] = ref[i];
-// 				clock_hand = (clock_hand + 1) % n;
-// 			}
-// 			//if the rbit of the process is 1
-// 			else
-// 			{
-// 				for (int i = 0; i < n; i++)
-// 				{
-// 					if (bits[ref[i]])
-// 					{
-// 						bits[ref[i]]=0;
-// 						clock_hand=(clock_hand+1)%n;
-// 						continue;
-// 					}
-// 					frames[clock_hand]=ref[i];
-// 					break;
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return;
-// }
 
 void Process::getPages(string ref_str)
 {
@@ -202,6 +159,12 @@ void Process::getPages(string ref_str)
 	}
 }
 
+void Process::printTable()
+{
+	for(int i=0;i<this->getFrames();i++)
+		cout << get<0>(this->frame_vector[i]) << "-" << get<1>(this->frame_vector[i]) << "\t\t";
+	cout << this->clock_hand << endl;
+}
 
 
 int main()
@@ -215,8 +178,8 @@ int main()
 
 	process.CPR_Algo();
 	
-	cout << "Page faults : " << process.getFaults() << "\t Fault ratio : " << (float) (process.getFaults() / process.ref_vector.size()) << endl;
-	cout << "Page hits : " << process.getFaults() << "\t Hit ratio : " << (float) (process.getHits() / process.ref_vector.size()) << endl;
+	cout << "Page faults : " << process.getFaults() << "\t Fault ratio : " << (float)process.getFaults() / process.ref_vector.size() << endl;
+	cout << "Page hits : " << process.getHits() << "\t Hit ratio : " << (float)process.getHits() / process.ref_vector.size() << endl;
 	
 	return 0;
 }
