@@ -15,7 +15,8 @@ public:
     int hit;
     //initialise hit and fault count to zero
     Process(){
-        fault=hit=0;
+        fault=0;
+        hit=0;
     }
 };
 
