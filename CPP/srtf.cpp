@@ -9,7 +9,7 @@ public:
     bool completed;
 };
 
-int *calcWT(vector<Process> process, int n, int waitingTimeArray[], int responseTimeArray[])
+void calcWT(vector<Process> process, int n, int waitingTimeArray[], int responseTimeArray[])
 {
     int tempBurstTimeArray[n], minBurstTime = INT_MAX, currentTime = 0, processCount = 0, min = 0, completionTime = 0;
     for (int i = 0; i < n; i++)
@@ -56,7 +56,6 @@ int *calcWT(vector<Process> process, int n, int waitingTimeArray[], int response
         minBurstTime = INT_MAX;
         currentTime++;
     }
-    return waitingTimeArray;
 }
 
 void calcTAT(vector<Process> process, int n,
