@@ -102,9 +102,9 @@ void SRTF(vector<Process> process, int n)
 int main()
 {
     Process process;
-    vector<Process> arr;
+    vector<Process> process_vector;
     int n;
-    cout << "Enter n : ";
+    cout << "Enter the number of processes : ";
     cin >> n;
     for (int i = 0; i < n; i++)
     {
@@ -117,8 +117,8 @@ int main()
             cin >> temp.burstTime;
             temp.completed = false;
         }
-        arr.push_back(temp);
+        process_vector.push_back(temp);
     }
-    SRTF(arr, n);
+    SRTF(process_vector, n);
     return 0;
 }
