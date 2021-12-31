@@ -5,97 +5,103 @@ using namespace std;
 class Process
 {
 public:
-    int pId, at, bt;
+    int processID, arrivalTime, burstTime;
     bool completed;
 };
 
-int* calcWT(vector<Process> proc, int n,int wt[])
+int *calcWT(vector<Process> process, int n, int waitingTimeArray[], int responseTimeArray[])
 {
-    int temp_bt[n], min_bt = INT_MAX, cur_time = 0,pCount=0,min=0,completion_time=0;
+    int tempBurstTimeArray[n], minBurstTime = INT_MAX, currentTime = 0, processCount = 0, min = 0, completionTime = 0;
     for (int i = 0; i < n; i++)
     {
-        temp_bt[i] = proc[i].bt;
+        tempBurstTimeArray[i] = process[i].burstTime;
     }
 
-    while (pCount != n)
+    while (processCount != n)
     {
-        int flag=0;
+        int flag = 0;
         for (int i = 0; i < n; i++)
         {
-            if (proc[i].at <= cur_time && temp_bt[i] < min_bt && proc[i].completed != true)
+            if (process[i].arrivalTime <= currentTime && tempBurstTimeArray[i] < minBurstTime && process[i].completed != true)
             {
-                min_bt = proc[i].bt;
-                min=i;
-                flag=1;
-                cout<<i<<endl;
+
+                minBurstTime = process[i].burstTime;
+                min = i;
+                flag = 1;
             }
         }
-        if (flag == 0) {
-            cur_time++;
+        if (responseTimeArray[min] == INT_MIN)
+        {
+            responseTimeArray[min] = currentTime - process[min].arrivalTime;
+        }
+        if (flag == 0)
+        {
+            currentTime++;
             continue;
         }
-        temp_bt[min]--;
-        if (!temp_bt[min])
+        tempBurstTimeArray[min]--;
+        if (!tempBurstTimeArray[min])
         {
-            proc[min].completed = true;
-            pCount++;
-            flag=0;
-            completion_time = cur_time + 1;
-            wt[min] = completion_time -
-                           proc[min].bt -
-                           proc[min].at;
+            process[min].completed = true;
+            processCount++;
+            flag = 0;
+            completionTime = currentTime + 1;
+            waitingTimeArray[min] = completionTime -
+                               process[min].burstTime -
+                               process[min].arrivalTime;
 
-            if (wt[min] < 0)
-                wt[min] = 0;
+            if (waitingTimeArray[min] < 0)
+                waitingTimeArray[min] = 0;
         }
-        min_bt=INT_MAX;
-        cur_time++;
+        minBurstTime = INT_MAX;
+        currentTime++;
     }
-    return wt;
+    return waitingTimeArray;
 }
 
-void calcTAT(vector<Process> proc, int n,
-                        int wt[], int tat[])
+void calcTAT(vector<Process> process, int n,
+             int waitingTimeArray[], int turnAroundTimeArray[])
 {
     for (int i = 0; i < n; i++)
     {
-        tat[i] = proc[i].bt + wt[i];
+        turnAroundTimeArray[i] = process[i].burstTime + waitingTimeArray[i];
     }
 }
 
-void SRTF(vector<Process> proc, int n)
+void SRTF(vector<Process> process, int n)
 {
-    int wt[n], tat[n], total_wt = 0,
-                       total_tat = 0;
-
-    calcWT(proc, n, wt);
-    calcTAT(proc, n, wt, tat);
-
-    cout << "Processes "
-         << " Burst time "
-         << " Waiting time "
-         << " Turn around time\n";
-
+    int waitingTimeArray[n], turnAroundTimeArray[n], responseTimeArray[n], total_wt,
+        total_tat, total_rt;
+    fill(responseTimeArray, responseTimeArray + n, INT_MIN);
+    calcWT(process, n, waitingTimeArray, responseTimeArray);
+    calcTAT(process, n, waitingTimeArray, turnAroundTimeArray);
+    cout << "Process "
+         << "   Burst time "
+         << "      Waiting time "
+         << " Turn around time "
+         << " Response Time" << endl;
 
     for (int i = 0; i < n; i++)
     {
-        cout << " " << proc[i].pId << "\t\t"
-             << proc[i].bt << "\t\t " << wt[i]
-             << "\t\t " << tat[i] << endl;
+        cout << "   " << process[i].processID << "\t\t"
+             << process[i].burstTime << "\t\t " << waitingTimeArray[i]
+             << "\t\t " << turnAroundTimeArray[i] << "\t\t " << responseTimeArray[i] << endl;
     }
-
-    total_wt = accumulate(wt, wt + n, 0);
-    total_tat = accumulate(tat, tat + n, 0);
-    cout << "\nAverage waiting time = "
+    total_rt = accumulate(responseTimeArray, responseTimeArray + n, 0);
+    total_wt = accumulate(waitingTimeArray, waitingTimeArray + n, 0);
+    total_tat = accumulate(turnAroundTimeArray, turnAroundTimeArray + n, 0);
+    cout << "\nAverage waiting time = " << total_wt << "/" << n << " = "
          << (float)total_wt / (float)n << endl;
-    cout << "Average turn around time = "
+    cout << "Average turn around time = " << total_tat << "/" << n << " = "
          << (float)total_tat / (float)n << endl;
+    cout << "Average response time = " << total_rt << "/" << n << " = "
+         << (float)total_rt / (float)n << endl;
     ;
 }
 
 int main()
 {
-    Process proc;
+    Process process;
     vector<Process> arr;
     int n;
     cout << "Enter n : ";
@@ -103,13 +109,13 @@ int main()
     for (int i = 0; i < n; i++)
     {
         Process temp;
-        cout << "Enter process ID , Burst time and Arrival time for process " << i + 1 << endl;
+        cout << "Enter Arrival time and Burst time for process " << i + 1 << endl;
         for (int j = 0; j < 1; j++)
         {
-            cin >> temp.pId;
-            cin >> temp.bt;
-            cin >> temp.at;
-            temp.completed=false;
+            temp.processID = i + 1;
+            cin >> temp.arrivalTime;
+            cin >> temp.burstTime;
+            temp.completed = false;
         }
         arr.push_back(temp);
     }
