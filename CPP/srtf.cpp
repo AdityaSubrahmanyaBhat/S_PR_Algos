@@ -32,7 +32,6 @@ void calcWT(vector<Process> process, int n, int waitingTimeArray[], int response
         }
         if (responseTimeArray[min] == INT_MIN && flag)
         {
-            cout<<"current time = "<<currentTime<<endl;
             responseTimeArray[min] = currentTime - process[min].arrivalTime;
         }
         if (flag == 0)
