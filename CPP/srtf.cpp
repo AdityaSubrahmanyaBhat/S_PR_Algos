@@ -1,5 +1,8 @@
 #include <iostream>
-#include <bits/stdc++.h>
+#include <vector>
+#include <numeric>
+#include <limits> 
+
 using namespace std;
 
 class Process
@@ -11,7 +14,7 @@ public:
 
 void calcWT(vector<Process> process, int n, int waitingTimeArray[], int responseTimeArray[])
 {
-    int tempBurstTimeArray[n], minBurstTime = INT_MAX, currentTime = 0, processCount = 0, min = 0, completionTime = 0;
+    int tempBurstTimeArray[n], minBurstTime = INT16_MAX, currentTime = 0, processCount = 0, min = 0, completionTime = 0;
     for (int i = 0; i < n; i++)
     {
         tempBurstTimeArray[i] = process[i].burstTime;
@@ -30,7 +33,7 @@ void calcWT(vector<Process> process, int n, int waitingTimeArray[], int response
                 flag = 1;
             }
         }
-        if (responseTimeArray[min] == INT_MIN && flag)
+        if (responseTimeArray[min] == INT16_MIN && flag)
         {
             responseTimeArray[min] = currentTime - process[min].arrivalTime;
         }
@@ -53,7 +56,7 @@ void calcWT(vector<Process> process, int n, int waitingTimeArray[], int response
             if (waitingTimeArray[min] < 0)
                 waitingTimeArray[min] = 0;
         }
-        minBurstTime = INT_MAX;
+        minBurstTime = INT16_MAX;
         currentTime++;
     }
 }
@@ -71,7 +74,7 @@ void SRTF(vector<Process> process, int n)
 {
     int waitingTimeArray[n], turnAroundTimeArray[n], responseTimeArray[n], total_wt,
         total_tat, total_rt;
-    fill(responseTimeArray, responseTimeArray + n, INT_MIN);
+    fill(responseTimeArray, responseTimeArray + n, INT16_MIN);
     calcWT(process, n, waitingTimeArray, responseTimeArray);
     calcTAT(process, n, waitingTimeArray, turnAroundTimeArray);
     cout << "Process "
